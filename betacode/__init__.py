@@ -1068,7 +1068,6 @@ g_to_b = {
 }
 
 
-# μῆνιν') # 'mh=nin'
 def to_betacode(unicode_text):
     """
     >>> to_betacode('μῆνιν')
