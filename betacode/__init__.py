@@ -1,4 +1,6 @@
 import re
+import string
+import unicodedata
 
 b_to_g = {
     "#": "ʹ",
@@ -1073,7 +1075,16 @@ def to_betacode(unicode_text):
     >>> to_betacode('μῆνιν')
     'mh=nin'
     """
-    return "".join([g_to_b.get(c, c) for c in unicode_text])
+    return "".join(g_to_b.get(c, c) for c in unicode_text)
+
+
+def to_perseus_betacode(unicode_text):
+    """
+    >>> to_perseus_betacode('μῆνιν')
+    'mhnin'
+    """
+    baby_text = remove_diacrtics(unicode_text.lower())
+    return to_betacode(baby_text)
 
 
 def prefixes(string, start=0):
@@ -1127,6 +1138,45 @@ def to_unicode(betacode_text):
             unicode_text += b_to_g[substring]
             start += len(substring)
     return fix_sigma_at_word_boundries(unicode_text)
+
+
+def split_greek_phrase_at_word_boundaries(greek_text):
+    """
+    >>> split_greek_phrase_at_word_boundaries('ἓν οἶδα ὅτι οὐδὲν οἶδα.')
+    ['ἓν', 'οἶδα', 'ὅτι', 'οὐδὲν', 'οἶδα', '.']
+    """
+    return [x.strip() for x in re.split(r"\b", greek_text) if x and x.strip()]
+
+
+def words_only(tokens):
+    """
+    Words only, no punctuation.
+    >>> words_only(split_greek_phrase_at_word_boundaries("ἓν οἶδα ὅτι οὐδὲν οἶδα·"))
+    ['ἓν', 'οἶδα', 'ὅτι', 'οὐδὲν', 'οἶδα']
+    """
+    return [x for x in tokens if x not in string.punctuation and x != "·"]
+
+
+def word_tokens(greek_text):
+    """
+    >>> word_tokens('ἓν οἶδα, ὅτι οὐδὲν οἶδα.')
+    ['ἓν', 'οἶδα', 'ὅτι', 'οὐδὲν', 'οἶδα']
+    """
+    return words_only(split_greek_phrase_at_word_boundaries(greek_text))
+
+
+def remove_diacrtics(greek_text):
+    """
+    Remove the diacritics from a Greek text.
+    including accents, breathings, iota subscripts, diaeresis, macrons, etc.
+    >>> remove_diacrtics('ἓν οἶδα ὅτι οὐδὲν οἶδα.')
+    'εν οιδα οτι ουδεν οιδα.'
+    """
+    return "".join(
+        c
+        for c in unicodedata.normalize("NFD", greek_text)
+        if unicodedata.category(c) != "Mn"
+    )
 
 
 if __name__ == "__main__":
