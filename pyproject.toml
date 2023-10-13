@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "betacode"
 version = "0.1.0"
-description = ""
+description = "To Greek Betacode and back!"
 authors = ["Will Fitzgerald <37049+willf@users.noreply.github.com>"]
 readme = "README.md"
 
